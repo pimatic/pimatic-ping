@@ -1,11 +1,12 @@
-# ##Dependencies
-convict = require "convict"
-util = require 'util'
-ping = require "net-ping"
-assert = require 'cassert'
-Q = require 'q'
-
 module.exports = (env) ->
+  # ##Dependencies
+  util = require 'util'
+
+  convict = env.require "convict"
+  Q = env.require 'q'
+  assert = env.require 'cassert'
+
+  ping = require "net-ping"
 
   # ##The DevicePresentsBackend
   class DevicePresentsBackend extends env.plugins.Plugin
