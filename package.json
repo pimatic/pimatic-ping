@@ -1,8 +1,10 @@
 { "name": "pimatic-ping",
-  "description": "ping plugin for pimatic",
+  "description": "Provides presents sensors for you wifi device, so actions can be triggered if a wifi device is present.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://sweetpi.de)",
   "main": "ping.coffee",
   "files": [
+    "doc",
+    "test",
     "ping.coffee",
     "README.md"
   ],

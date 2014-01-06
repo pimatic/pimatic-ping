@@ -12,7 +12,7 @@ Add the plugin to the plugin section:
       "plugin": "ping"
     }
 
-Then add a sensor for your device to the sensors section:
+Then add a sensor for your device to the devices section:
 
     {
       "id": "my-phone",
