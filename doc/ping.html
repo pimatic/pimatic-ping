@@ -10,19 +10,19 @@
         <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s">&quot;ping-plugins needs root privilegs. Please restart the framework as root!&quot;</span>
       <span class="vi">@session = </span><span class="nx">ping</span><span class="p">.</span><span class="nx">createSession</span><span class="p">()</span>
 
-    <span class="nv">createSensor: </span><span class="nf">(config) -&gt;</span>
+    <span class="nv">createDevice: </span><span class="nf">(config) -&gt;</span>
       <span class="k">if</span> <span class="nx">@session</span><span class="o">?</span> <span class="o">and</span> <span class="nx">config</span><span class="p">.</span><span class="nx">class</span> <span class="o">is</span> <span class="s">&#39;PingPresents&#39;</span>
         <span class="nx">assert</span> <span class="nx">config</span><span class="p">.</span><span class="nx">id</span><span class="o">?</span>
         <span class="nx">assert</span> <span class="nx">config</span><span class="p">.</span><span class="nx">name</span><span class="o">?</span>
         <span class="nx">assert</span> <span class="nx">config</span><span class="p">.</span><span class="nx">host</span><span class="o">?</span> 
         <span class="nv">config.delay = </span><span class="p">(</span><span class="k">if</span> <span class="nx">config</span><span class="p">.</span><span class="nx">delay</span> <span class="k">then</span> <span class="nx">config</span><span class="p">.</span><span class="nx">delay</span> <span class="k">else</span> <span class="mi">3000</span><span class="p">)</span>
         <span class="nv">sensor = </span><span class="k">new</span> <span class="nx">PingPresents</span> <span class="nx">config</span><span class="p">,</span> <span class="nx">@session</span>
-        <span class="nx">@framework</span><span class="p">.</span><span class="nx">registerSensor</span> <span class="nx">sensor</span>
+        <span class="nx">@framework</span><span class="p">.</span><span class="nx">registerDevice</span> <span class="nx">sensor</span>
         <span class="k">return</span> <span class="kc">true</span>
       <span class="k">return</span> <span class="kc">false</span>
 
 
-  <span class="nv">backend = </span><span class="k">new</span> <span class="nx">DevicePresentsBackend</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="pingpresents-sensor">PingPresents Sensor</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper">  <span class="k">class</span> <span class="nx">PingPresents</span> <span class="k">extends</span> <span class="nx">env</span><span class="p">.</span><span class="nx">sensors</span><span class="p">.</span><span class="nx">PresentsSensor</span>
+  <span class="nv">backend = </span><span class="k">new</span> <span class="nx">DevicePresentsBackend</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="pingpresents-sensor">PingPresents Sensor</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper">  <span class="k">class</span> <span class="nx">PingPresents</span> <span class="k">extends</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">PresentsSensor</span>
 
     <span class="nv">constructor: </span><span class="nf">(@config, session) -&gt;</span>
       <span class="vi">@id = </span><span class="nx">config</span><span class="p">.</span><span class="nx">id</span>

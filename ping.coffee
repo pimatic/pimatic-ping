@@ -20,14 +20,14 @@ module.exports = (env) ->
         throw new Error "ping-plugins needs root privilegs. Please restart the framework as root!"
       @session = ping.createSession()
 
-    createSensor: (config) ->
+    createDevice: (config) ->
       if @session? and config.class is 'PingPresents'
         assert config.id?
         assert config.name?
         assert config.host? 
         config.delay = (if config.delay then config.delay else 3000)
         sensor = new PingPresents config, @session
-        @framework.registerSensor sensor
+        @framework.registerDevice sensor
         return true
       return false
 
@@ -35,7 +35,7 @@ module.exports = (env) ->
   backend = new DevicePresentsBackend
 
   # ##PingPresents Sensor
-  class PingPresents extends env.sensors.PresentsSensor
+  class PingPresents extends env.devices.PresentsSensor
 
     constructor: (@config, session) ->
       @id = config.id
