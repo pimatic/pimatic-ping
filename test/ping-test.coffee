@@ -5,7 +5,7 @@ module.exports = (env) ->
   describe "pimatic-ping", ->
 
     plugin = (require 'pimatic-ping') env
-    PingPresents = plugin.PingPresents
+    PingPresence = plugin.PingPresence
 
     beforeEach =>
       @sessionDummy = 
@@ -15,34 +15,34 @@ module.exports = (env) ->
         name: 'test device'
         host: 'localhost'
         delay: 200
-      @sensor = new PingPresents(config, @sessionDummy)
+      @sensor = new PingPresence(config, @sessionDummy)
 
-    describe '#on present', =>
+    describe '#on presence', =>
 
-      it "should notify when device is present", (finish) =>
+      it "should notify when device is presence", (finish) =>
         @sessionDummy.pingHost = (host, callback) =>
           assert host is "localhost"
           setTimeout () =>
             callback null, host
           ,22
 
-        listener = (present) =>
-          assert present is true
-          @sensor.removeListener 'present', listener
+        listener = (presence) =>
+          assert presence is true
+          @sensor.removeListener 'presence', listener
           finish()
 
-        @sensor.on 'present', listener
+        @sensor.on 'presence', listener
 
-      it "should notify when device is not present", (finish) =>
+      it "should notify when device is not presence", (finish) =>
         @sessionDummy.pingHost = (host, callback) =>
           assert host is "localhost"
           setTimeout =>
             callback new Error('foo'), host
           ,22
 
-        listener = (present) =>
-          assert present is false
-          @sensor.removeListener 'present', listener
+        listener = (presence) =>
+          assert presence is false
+          @sensor.removeListener 'presence', listener
           finish()
 
-        @sensor.on 'present', listener
+        @sensor.on 'presence', listener

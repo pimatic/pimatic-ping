@@ -8,12 +8,9 @@ module.exports = (env) ->
 
   ping = require "net-ping"
 
-  # ##The DevicePresentsBackend
-  class DevicePresentsBackend extends env.plugins.Plugin
-    framework: null
-    config: null
+  # ##The PingPlugin
+  class PingPlugin extends env.plugins.Plugin
 
-    # The `init` function just registers the clock actuator.
     init: (app, @framework, @config) =>
       # ping package needs root access...
       if process.getuid() != 0
@@ -21,34 +18,34 @@ module.exports = (env) ->
       @session = ping.createSession()
 
     createDevice: (config) ->
-      if @session? and config.class is 'PingPresents'
+      if @session? and config.class is 'PingPresence'
         assert config.id?
         assert config.name?
         assert config.host? 
         config.delay = (if config.delay then config.delay else 3000)
-        sensor = new PingPresents config, @session
+        sensor = new PingPresence config, @session
         @framework.registerDevice sensor
         return true
       return false
 
 
-  backend = new DevicePresentsBackend
+  pingPlugin = new PingPlugin
 
-  # ##PingPresents Sensor
-  class PingPresents extends env.devices.PresentsSensor
+  # ##PingPresence Sensor
+  class PingPresence extends env.devices.PresenceSensor
 
     constructor: (@config, session) ->
       @id = config.id
       @name = config.name
 
       ping = => session.pingHost @config.host, (error, target) =>
-        @_setPresent (if error then no else yes)
+        @_setPresence (if error then no else yes)
 
       @interval = setInterval(ping, config.delay)
 
 
 
   # For testing...
-  backend.PingPresents = PingPresents
+  pingPlugin.PingPresence = PingPresence
 
-  return backend
+  return pingPlugin
