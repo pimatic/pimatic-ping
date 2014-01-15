@@ -37,6 +37,7 @@ module.exports = (env) ->
     constructor: (@config, session) ->
       @id = config.id
       @name = config.name
+      super()
 
       ping = => session.pingHost @config.host, (error, target) =>
         @_setPresence (if error then no else yes)
