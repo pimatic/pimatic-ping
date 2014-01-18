@@ -18,6 +18,9 @@ module.exports = (env) ->
       @session = ping.createSession()
 
     createDevice: (config) ->
+      #some legacy support:
+      if config.class is 'PingPresents' then config.class = 'PingPresence'
+
       if @session? and config.class is 'PingPresence'
         assert config.id?
         assert config.name?
