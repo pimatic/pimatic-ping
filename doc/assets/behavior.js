@@ -85,16 +85,16 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
           "type": "heading",
           "data": {
             "level": 2,
-            "title": "The DevicePresentsBackend",
-            "slug": "the-devicepresentsbackend"
+            "title": "The PingPlugin",
+            "slug": "the-pingplugin"
           },
           "depth": 2
         }, {
           "type": "heading",
           "data": {
             "level": 2,
-            "title": "PingPresents Sensor",
-            "slug": "pingpresents-sensor"
+            "title": "PingPresence Sensor",
+            "slug": "pingpresence-sensor"
           },
           "depth": 2
         }
@@ -116,7 +116,8 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
     "redirect": "../pimatic-redirect",
     "rest-api": "../pimatic-rest-api",
     "sispmctl": "../pimatic-sispmctl",
-    "speak-api": "../pimatic-speak-api"
+    "speak-api": "../pimatic-speak-api",
+    "voice-recognition": "../pimatic-voice-recognition"
   };
 
   nav$ = null;
