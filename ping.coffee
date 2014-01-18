@@ -47,7 +47,12 @@ module.exports = (env) ->
 
       @interval = setInterval(ping, config.delay)
 
-
+    getPresence: ->
+      if @_presence then return Q @_presence
+      deferred = Q.defer()
+      @once 'presence', (presence)=>
+        deferred.resolve presence
+      return deferred.promise
 
   # For testing...
   pingPlugin.PingPresence = PingPresence
