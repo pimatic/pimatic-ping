@@ -17,7 +17,7 @@ Then add a sensor for your device to the devices section:
     {
       "id": "my-phone",
       "name": "my smartphone",
-      "class": "PingPresents",
+      "class": "PingPresence",
       "host": "192.168.1.26",
       "delay": 5000
     }
