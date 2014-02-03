@@ -6,6 +6,7 @@
     "doc",
     "test",
     "ping.coffee",
+    "device-config-schema.coffee",
     "README.md"
   ],
   "version": "0.5.2",
