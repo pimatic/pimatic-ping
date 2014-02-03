@@ -5,6 +5,7 @@ module.exports = (env) ->
   convict = env.require "convict"
   Q = env.require 'q'
   assert = env.require 'cassert'
+  convict = env.require "convict"
 
   ping = require "net-ping"
 
@@ -15,19 +16,19 @@ module.exports = (env) ->
       # ping package needs root access...
       if process.getuid() != 0
         throw new Error "ping-plugins needs root privilegs. Please restart the framework as root!"
-      @session = ping.createSession()
+      @deviceCount = 0
+
 
     createDevice: (config) ->
       #some legacy support:
       if config.class is 'PingPresents' then config.class = 'PingPresence'
 
-      if @session? and config.class is 'PingPresence'
+      if config.class is 'PingPresence'
         assert config.id?
         assert config.name?
-        assert config.host? 
-        config.delay = (if config.delay then config.delay else 3000)
-        sensor = new PingPresence config, @session
-        @framework.registerDevice sensor
+        sensor = new PingPresence config
+        @framework.registerDevice sensor, @deviceCount
+        @deviceCount++
         return true
       return false
 
@@ -37,15 +38,46 @@ module.exports = (env) ->
   # ##PingPresence Sensor
   class PingPresence extends env.devices.PresenceSensor
 
-    constructor: (@config, session) ->
-      @id = config.id
-      @name = config.name
+    constructor: (deviceConfig, deviceNum) ->
+      @conf = convict require("./device-config-schema")
+      @conf.load deviceConfig
+      @conf.validate()
+      @name = @conf.get "name"
+      @id = @conf.get "id"
+      @host = @conf.get "host"
+      @timeout = @conf.get "timeout"
+      @retries = @conf.get "retries"
+      # some legazy support: delay is now interval
+      if deviceConfig.delay?
+        @interval = deviceConfig.delay
+        delete deviceConfig.delay
+        deviceConfig.interval = @interval 
+      else
+        @interval = @conf.get "interval"
+
+      @session = ping.createSession(
+        networkProtocol: ping.NetworkProtocol.IPv4
+        packetSize: 16
+        retries: @retries
+        sessionId: ((process.pid + deviceNum) % 65535)
+        timeout: @timeout
+        ttl: 128
+      )
       super()
 
-      ping = => session.pingHost @config.host, (error, target) =>
-        @_setPresence (if error then no else yes)
+      pendingPingsCount = 0
 
-      @interval = setInterval(ping, config.delay)
+      ping = => 
+        pendingPingsCount++;
+        @session.pingHost(@host, (error, target) =>
+          pendingPingsCount--;
+          console.log error, pendingPingsCount
+          @_setPresence (if error then no else yes)
+          assert pendingPingsCount is 0
+          setTimeout(ping, @interval)    
+        )
+
+      ping()
 
     getPresence: ->
       if @_presence? then return Q @_presence
