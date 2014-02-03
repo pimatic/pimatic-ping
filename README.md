@@ -19,7 +19,7 @@ Then add a sensor for your device to the devices section:
       "name": "my smartphone",
       "class": "PingPresence",
       "host": "192.168.1.26",
-      "delay": 5000
+      "interval": 5000
     }
 
 Then you can use the predicates:

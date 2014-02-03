@@ -7,7 +7,7 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   convict = env.require "convict"
 
-  ping = require "net-ping"
+  ping = env.ping or require("net-ping")
 
   # ##The PingPlugin
   class PingPlugin extends env.plugins.Plugin
@@ -39,7 +39,8 @@ module.exports = (env) ->
   class PingPresence extends env.devices.PresenceSensor
 
     constructor: (deviceConfig, deviceNum) ->
-      @conf = convict require("./device-config-schema")
+      configSchema = require("./device-config-schema")
+      @conf = convict configSchema
       @conf.load deviceConfig
       @conf.validate()
       @name = @conf.get "name"
@@ -71,7 +72,7 @@ module.exports = (env) ->
         pendingPingsCount++;
         @session.pingHost(@host, (error, target) =>
           pendingPingsCount--;
-          console.log error, pendingPingsCount
+          #env.logger.debug error
           @_setPresence (if error then no else yes)
           assert pendingPingsCount is 0
           setTimeout(ping, @interval)    
