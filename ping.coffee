@@ -6,6 +6,7 @@ module.exports = (env) ->
   Q = env.require 'q'
   assert = env.require 'cassert'
   convict = env.require "convict"
+  _ = env.require 'lodash'
 
   ping = env.ping or require("net-ping")
 
@@ -39,7 +40,7 @@ module.exports = (env) ->
   class PingPresence extends env.devices.PresenceSensor
 
     constructor: (deviceConfig, deviceNum) ->
-      configSchema = require("./device-config-schema")
+      configSchema = _.cloneDeep(require("./device-config-schema"))
       @conf = convict configSchema
       @conf.load deviceConfig
       @conf.validate()
