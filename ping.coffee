@@ -69,17 +69,17 @@ module.exports = (env) ->
 
       pendingPingsCount = 0
 
-      ping = => 
+      doPing = => 
         pendingPingsCount++
         @session.pingHost(@host, (error, target) =>
           pendingPingsCount--
           #env.logger.debug error
           @_setPresence (if error then no else yes)
           assert pendingPingsCount is 0
-          setTimeout(ping, @interval)    
+          setTimeout(doPing, @interval)    
         )
 
-      ping()
+      doPing()
 
     getPresence: ->
       if @_presence? then return Q @_presence
