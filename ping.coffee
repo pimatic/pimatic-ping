@@ -27,8 +27,8 @@ module.exports = (env) ->
       if config.class is 'PingPresence'
         assert config.id?
         assert config.name?
-        sensor = new PingPresence config
-        @framework.registerDevice sensor, @deviceCount
+        sensor = new PingPresence config, @deviceCount
+        @framework.registerDevice sensor
         @deviceCount++
         return true
       return false
@@ -72,11 +72,13 @@ module.exports = (env) ->
       doPing = => 
         pendingPingsCount++
         @session.pingHost(@host, (error, target) =>
-          pendingPingsCount--
-          #env.logger.debug error
+          if pendingPingsCount > 0
+            pendingPingsCount--
+          else
+            env.logger.warn "got more pings back than sent"
           @_setPresence (if error then no else yes)
-          assert pendingPingsCount is 0
-          setTimeout(doPing, @interval)    
+          if pendingPingsCount is 0
+            setTimeout(doPing, @interval)
         )
 
       doPing()
