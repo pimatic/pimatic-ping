@@ -75,7 +75,7 @@ module.exports = (env) ->
           if pendingPingsCount > 0
             pendingPingsCount--
           else
-            env.logger.warn "got more pings back than sent"
+            env.logger.debug "ping callback called too many times"
           @_setPresence (if error then no else yes)
           if pendingPingsCount is 0
             setTimeout(doPing, @interval)
