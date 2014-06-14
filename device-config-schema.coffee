@@ -1,20 +1,18 @@
-# #PingPresence sensor configuration options
-
-# Defines a `node-convict` config-schema and exports it.
 module.exports =
-  host:
-    doc: "the ip or hostname to ping"
-    format: String
-    default: ""
-  interval:
-    doc: "the delay between pings"
-    format: "nat"
-    default: 5000
-  timeout:
-    doc: "the time after a ping request timeouts"
-    format: "nat"
-    default: 2000
-  retries:
-    doc: "number of tries to fail after that the device is considerd absent"
-    format: "nat"
-    default: 4
+  PingPresents:
+    host:
+      description: "the ip or hostname to ping"
+      type: "string"
+      default: ""
+    interval:
+      description: "the delay between pings"
+      type: "number"
+      default: 5000
+    timeout:
+      description: "the time after a ping request timeouts"
+      type: "number"
+      default: 2000
+    retries:
+      description: "number of tries to fail after that the device is considerd absent"
+      type: "number"
+      default: 4

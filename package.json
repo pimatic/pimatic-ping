@@ -9,7 +9,7 @@
     "device-config-schema.coffee",
     "README.md"
   ],
-  "version": "0.7.0",
+  "version": "0.8.0",
   "homepage": "http://github.com/pimatic/pimatic",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "net-ping": "~1.1.9"
   },
   "peerDependencies": {
-    "pimatic": "0.7.*"
+    "pimatic": "0.8.*"
   },
   "engines": {
     "node": ">0.8.x",

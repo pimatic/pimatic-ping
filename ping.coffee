@@ -19,67 +19,49 @@ module.exports = (env) ->
         throw new Error "ping-plugins needs root privilegs. Please restart the framework as root!"
       @deviceCount = 0
 
+      deviceConfigDef = require("./device-config-schema")
 
-    createDevice: (config) ->
-      #some legacy support:
-      if config.class is 'PingPresents' then config.class = 'PingPresence'
-
-      if config.class is 'PingPresence'
-        assert config.id?
-        assert config.name?
-        sensor = new PingPresence config, @deviceCount
-        @framework.registerDevice sensor
-        @deviceCount++
-        return true
-      return false
-
+      @framework.registerDeviceClass("PingPresence", {
+        configDef: deviceConfigDef.PingPresents, 
+        createCallback: (config) => 
+          device = new PingPresence(config, @deviceCount)
+          @deviceCount++
+          return device
+      })
 
   pingPlugin = new PingPlugin
 
   # ##PingPresence Sensor
   class PingPresence extends env.devices.PresenceSensor
 
-    constructor: (deviceConfig, deviceNum) ->
-      configSchema = _.cloneDeep(require("./device-config-schema"))
-      @conf = convict configSchema
-      @conf.load deviceConfig
-      @conf.validate()
-      @name = @conf.get "name"
-      @id = @conf.get "id"
-      @host = @conf.get "host"
-      @timeout = @conf.get "timeout"
-      @retries = @conf.get "retries"
-      # some legazy support: delay is now interval
-      if deviceConfig.delay?
-        @interval = deviceConfig.delay
-        delete deviceConfig.delay
-        deviceConfig.interval = @interval 
-      else
-        @interval = @conf.get "interval"
+    constructor: (@config, deviceNum) ->
+      @name = @config.name
+      @id = @config.id
 
       @session = ping.createSession(
         networkProtocol: ping.NetworkProtocol.IPv4
         packetSize: 16
-        retries: @retries
+        retries: @config.retries
         sessionId: ((process.pid + deviceNum) % 65535)
-        timeout: @timeout
+        timeout: @config.timeout
         ttl: 128
       )
       super()
 
       pendingPingsCount = 0
 
-      doPing = => 
+      doPing = ( => 
         pendingPingsCount++
-        @session.pingHost(@host, (error, target) =>
+        @session.pingHost(@config.host, (error, target) =>
           if pendingPingsCount > 0
             pendingPingsCount--
           else
             env.logger.debug "ping callback called too many times"
           @_setPresence (if error then no else yes)
           if pendingPingsCount is 0
-            setTimeout(doPing, @interval)
+            setTimeout(doPing, @config.interval)
         )
+      )
 
       doPing()
 
