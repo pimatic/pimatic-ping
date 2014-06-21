@@ -2,10 +2,8 @@ module.exports = (env) ->
   # ##Dependencies
   util = require 'util'
 
-  convict = env.require "convict"
   Q = env.require 'q'
   assert = env.require 'cassert'
-  convict = env.require "convict"
   _ = env.require 'lodash'
 
   ping = env.ping or require("net-ping")
