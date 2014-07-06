@@ -2,7 +2,7 @@ module.exports = (env) ->
   # ##Dependencies
   util = require 'util'
 
-  Q = env.require 'q'
+  Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
 
@@ -64,11 +64,11 @@ module.exports = (env) ->
       doPing()
 
     getPresence: ->
-      if @_presence? then return Q @_presence
-      deferred = Q.defer()
-      @once 'presence', (presence)=>
-        deferred.resolve presence
-      return deferred.promise
+      if @_presence? then return Promise.resolve @_presence
+      return new Promise( (resolve, reject) =>
+        @once 'presence', (presence)=>
+          resolve presence
+      ).timeout(30000)
 
   # For testing...
   pingPlugin.PingPresence = PingPresence
