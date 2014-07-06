@@ -51,7 +51,6 @@ module.exports = (env) ->
       doPing = ( => 
         pendingPingsCount++
         @session.pingHost(@config.host, (error, target) =>
-          console.log error
           if pendingPingsCount > 0
             pendingPingsCount--
           else
@@ -68,7 +67,7 @@ module.exports = (env) ->
       if @_presence? then return Promise.resolve @_presence
       return new Promise( (resolve, reject) =>
         @once('presence', ( (state) -> resolve state ) )
-      ).timeout(@config.timeout + 10000)
+      ).timeout(@config.timeout + 5*60*1000)
 
   # For testing...
   pingPlugin.PingPresence = PingPresence
