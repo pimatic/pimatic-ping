@@ -19,7 +19,7 @@ module.exports = (env) ->
 
       deviceConfigDef = require("./device-config-schema")
 
-      @framework.registerDeviceClass("PingPresence", {
+      @framework.deviceManager.registerDeviceClass("PingPresence", {
         configDef: deviceConfigDef.PingPresents, 
         createCallback: (config) => 
           device = new PingPresence(config, @deviceCount)
