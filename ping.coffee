@@ -53,8 +53,6 @@ module.exports = (env) ->
         @session.pingHost(@config.host, (error, target) =>
           if pendingPingsCount > 0
             pendingPingsCount--
-          else
-            env.logger.debug "ping callback called too many times"
           @_setPresence (if error then no else yes)
           if pendingPingsCount is 0
             setTimeout(doPing, @config.interval)
