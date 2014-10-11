@@ -3,6 +3,7 @@ module.exports = {
   PingPresents: {
     title: "PingPresents config options"
     type: "object"
+    extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
     properties:
       host:
         description: "the ip or hostname to ping"
