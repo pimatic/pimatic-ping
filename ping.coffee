@@ -21,8 +21,8 @@ module.exports = (env) ->
 
       @framework.deviceManager.registerDeviceClass("PingPresence", {
         configDef: deviceConfigDef.PingPresents, 
-        createCallback: (config) => 
-          device = new PingPresence(config, @deviceCount)
+        createCallback: (config, lastState) => 
+          device = new PingPresence(config, lastState, @deviceCount)
           @deviceCount++
           return device
       })
@@ -32,10 +32,11 @@ module.exports = (env) ->
   # ##PingPresence Sensor
   class PingPresence extends env.devices.PresenceSensor
 
-    constructor: (@config, deviceNum) ->
+    constructor: (@config, lastState, deviceNum) ->
       @name = @config.name
       @id = @config.id
-
+      @_presence = lastState?.presence?.value or false
+      
       @session = ping.createSession(
         networkProtocol: ping.NetworkProtocol.IPv4
         packetSize: 16
