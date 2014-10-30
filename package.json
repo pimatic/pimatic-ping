@@ -1,4 +1,5 @@
-{ "name": "pimatic-ping",
+{
+  "name": "pimatic-ping",
   "description": "Provides presents sensors for you wifi device, so actions can be triggered if a wifi device is present.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://sweetpi.de)",
   "main": "ping.coffee",
@@ -10,7 +11,7 @@
     "ping-config-schema.coffee",
     "README.md"
   ],
-  "version": "0.8.2",
+  "version": "0.8.3",
   "homepage": "http://github.com/pimatic/pimatic",
   "repository": {
     "type": "git",
