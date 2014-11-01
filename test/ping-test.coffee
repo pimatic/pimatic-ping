@@ -39,7 +39,7 @@ module.exports = (env) ->
         retries: 1
         timeout: 2001
 
-      @sensor = new PingPresence(config, 0)
+      @sensor = new PingPresence(config, false, 0)
 
     describe '#on presence', =>
 
