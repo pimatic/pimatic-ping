@@ -18,7 +18,7 @@ module.exports = {
         type: "number"
         default: 2000
       retries:
-        description: "number of tries to fail after that the device is considerd absent"
+        description: "number of tries to fail after that the device is considered absent"
         type: "number"
         default: 4
   }
