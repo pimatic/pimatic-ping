@@ -51,16 +51,18 @@ module.exports = (env) ->
       pendingPingsCount = 0
 
       doPing = ( =>
-        dns.lookup(@config.host, (dnsError, address, family) =>
-          if !dnsError
+        dns.lookup(@config.host, 4, (dnsError, address, family) =>
+          if dnsError?
+            env.logger.error("Error on ip lookup of #{@config.host}: #{dnsError}")
+          else
             pendingPingsCount++
             @session.pingHost(address, (error, target) =>
               if pendingPingsCount > 0
                 pendingPingsCount--
               @_setPresence (if error then no else yes)
-              if pendingPingsCount is 0
-                setTimeout(doPing, @config.interval)
             )
+          if pendingPingsCount is 0
+            setTimeout(doPing, @config.interval)
         )
       )
 
