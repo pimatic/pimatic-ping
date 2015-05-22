@@ -7,6 +7,7 @@ module.exports = (env) ->
   _ = env.require 'lodash'
 
   ping = env.ping or require("net-ping")
+  dns = env.dns or require("dns")
 
   # ##The PingPlugin
   class PingPlugin extends env.plugins.Plugin
@@ -49,14 +50,17 @@ module.exports = (env) ->
 
       pendingPingsCount = 0
 
-      doPing = ( => 
-        pendingPingsCount++
-        @session.pingHost(@config.host, (error, target) =>
-          if pendingPingsCount > 0
-            pendingPingsCount--
-          @_setPresence (if error then no else yes)
-          if pendingPingsCount is 0
-            setTimeout(doPing, @config.interval)
+      doPing = ( =>
+        dns.lookup(@config.host, (dnsError, address, family) =>
+          if !dnsError
+            pendingPingsCount++
+            @session.pingHost(address, (error, target) =>
+              if pendingPingsCount > 0
+                pendingPingsCount--
+              @_setPresence (if error then no else yes)
+              if pendingPingsCount is 0
+                setTimeout(doPing, @config.interval)
+            )
         )
       )
 
