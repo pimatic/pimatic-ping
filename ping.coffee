@@ -49,17 +49,20 @@ module.exports = (env) ->
       super()
 
       pendingPingsCount = 0
-
+      lastError = null
       doPing = ( =>
         dns.lookup(@config.host, 4, (dnsError, address, family) =>
           if dnsError?
-            env.logger.error("Error on ip lookup of #{@config.host}: #{dnsError}")
+            if lastError?.message isnt dnsError.message
+              env.logger.warn("Error on ip lookup of #{@config.host}: #{dnsError}")
+              lastError = dnsError
+            @_setPresence(no)
             setTimeout(doPing, @config.interval) if pendingPingsCount is 0
           else
             pendingPingsCount++
             @session.pingHost(address, (error, target) =>
               pendingPingsCount-- if pendingPingsCount > 0
-              @_setPresence (if error then no else yes)
+              @_setPresence (if error? then no else yes)
               setTimeout(doPing, @config.interval) if pendingPingsCount is 0
             )
         )
