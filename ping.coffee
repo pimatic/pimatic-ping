@@ -1,10 +1,10 @@
 module.exports = (env) ->
   # ##Dependencies
   util = require 'util'
+  os = require 'os'
 
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
-  _ = env.require 'lodash'
 
   ping = env.ping or require("net-ping")
   dns = env.dns or require("dns")
@@ -14,8 +14,8 @@ module.exports = (env) ->
 
     init: (app, @framework, @config) =>
       # ping package needs root access...
-      if process.getuid() != 0
-        throw new Error "ping-plugins needs root privilegs. Please restart the framework as root!"
+      if os.platform() isnt 'win32' and process.getuid() != 0
+        throw new Error "ping-plugins needs root privileges. Please restart the framework as root!"
       @deviceCount = 0
 
       deviceConfigDef = require("./device-config-schema")
@@ -51,7 +51,7 @@ module.exports = (env) ->
       pendingPingsCount = 0
       lastError = null
       doPing = ( =>
-        dns.lookup(@config.host, 4, (dnsError, address, family) =>
+        dns.resolve4(@config.host, (dnsError, addresses) =>
           if dnsError?
             if lastError?.message isnt dnsError.message
               env.logger.warn("Error on ip lookup of #{@config.host}: #{dnsError}")
@@ -60,9 +60,12 @@ module.exports = (env) ->
             setTimeout(doPing, @config.interval) if pendingPingsCount is 0
           else
             pendingPingsCount++
-            @session.pingHost(address, (error, target) =>
+            Promise.some(@_pingHost address for address in addresses, 1).then( =>
+              @_setPresence yes
+            ).catch( =>
+              @_setPresence no
+            ).finally( =>
               pendingPingsCount-- if pendingPingsCount > 0
-              @_setPresence (if error? then no else yes)
               setTimeout(doPing, @config.interval) if pendingPingsCount is 0
             )
         )
@@ -70,9 +73,16 @@ module.exports = (env) ->
 
       doPing()
 
+    _pingHost: (address) ->
+      return new Promise( (resolve, reject) =>
+        @session.pingHost(address, (error, target) =>
+          if error? then reject error else resolve target
+        )
+      )
+
     getPresence: ->
       if @_presence? then return Promise.resolve @_presence
-      return new Promise( (resolve, reject) =>
+      return new Promise( (resolve) =>
         @once('presence', ( (state) -> resolve state ) )
       ).timeout(@config.timeout + 5*60*1000)
 

@@ -1,6 +1,6 @@
 {
   "name": "pimatic-ping",
-  "description": "Provides presents sensors for you wifi device, so actions can be triggered if a wifi device is present.",
+  "description": "Provides presence sensors for your wifi device, so actions can be triggered if a wifi device is present.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://sweetpi.de)",
   "main": "ping.coffee",
   "files": [
@@ -19,7 +19,7 @@
   },
   "configSchema": "ping-config-schema.coffee",
   "dependencies": {
-    "net-ping": "~1.1.9"
+    "net-ping": "git+https://github.com/mwittig/node-net-ping.git"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"

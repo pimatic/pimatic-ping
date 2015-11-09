@@ -43,7 +43,7 @@ module.exports = (env) ->
 
     describe '#on presence', =>
 
-      it "should notify when device is presence", (finish) =>
+      it "should notify when device is present", (finish) =>
         @sessionDummy.pingHost = (host, callback) =>
           cassert host is "localhost"
           setTimeout( () =>
@@ -58,7 +58,7 @@ module.exports = (env) ->
         @sensor._presence = false
         @sensor.on 'presence', listener
 
-      it "should notify when device is not presence", (finish) =>
+      it "should notify when device is not present", (finish) =>
         @sessionDummy.pingHost = (host, callback) =>
           cassert host is "localhost"
           setTimeout( =>

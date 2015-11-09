@@ -1,7 +1,7 @@
 pimatic ping plugin
 ===================
 
-Provides Sensors for you wifi device, so actions can be triggered
+Provides presence sensors for your wifi device, so actions can be triggered
 if a wifi device is (or is not) present.
 
 Providided predicates
