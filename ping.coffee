@@ -8,7 +8,8 @@ module.exports = (env) ->
   assert = env.require 'cassert'
 
   ping = env.ping or require("net-ping")
-  dns = env.dns or require("dns")
+  resolve4 = Promise.promisify (env.dns or require "dns").resolve4
+  resolve6 = Promise.promisify (env.dns or require "dns").resolve6
 
   # ##The PingPlugin
   class PingPlugin extends env.plugins.Plugin
@@ -38,7 +39,16 @@ module.exports = (env) ->
       @name = @config.name
       @id = @config.id
       @_presence = lastState?.presence?.value or false
-      
+
+      @_resolve = resolve4
+      if @config.dnsRecordFamily is 6
+        @_resolve = resolve6
+      else if @config.dnsRecordFamily is 0
+        @_resolve = @_resolveAny
+      else if @config.dnsRecordFamily is 10
+        @_resolve = @_resolveHybrid
+
+
       @session = ping.createSession(
         networkProtocol: ping.NetworkProtocol.IPv4
         packetSize: 16
@@ -52,41 +62,65 @@ module.exports = (env) ->
       pendingPingsCount = 0
       lastError = null
       doPing = ( =>
-        @_resolveHost(@config.host, (dnsError, addresses) =>
-          if dnsError?
-            if lastError?.message isnt dnsError.message
-              env.logger.warn("Error on ip lookup of #{@config.host}: #{dnsError}")
-              lastError = dnsError
-            @_setPresence(no)
+        pendingPingsCount++
+        @_resolveHost(@config.host).then( (addresses) =>
+          Promise.any(@_pingHost address for address in addresses).then( =>
+            @_setPresence yes
+          ).catch( =>
+            @_setPresence no
+          ).finally( =>
+            pendingPingsCount-- if pendingPingsCount > 0
             setTimeout(doPing, @config.interval) if pendingPingsCount is 0
-          else
-            pendingPingsCount++
-            Promise.some(@_pingHost address for address in addresses, 1).then((target) =>
-              @_setPresence yes
-            ).catch( =>
-              @_setPresence no
-            ).finally( =>
-              pendingPingsCount-- if pendingPingsCount > 0
-              setTimeout(doPing, @config.interval) if pendingPingsCount is 0
-            )
+          )
+        ).catch( (dnsError) =>
+          if lastError?.message isnt dnsError.message
+            env.logger.warn("Error on ip lookup of #{@config.host}: #{dnsError}")
+            lastError = dnsError
+          @_setPresence(no)
+          pendingPingsCount-- if pendingPingsCount > 0
+          setTimeout(doPing, @config.interval) if pendingPingsCount is 0
         )
       )
 
       doPing()
 
-    _resolveHost: (hostOrIP, cb) ->
+    _resolveHost: (hostOrIP) ->
       result = net.isIP hostOrIP
       if result is 4 or result is 6
-        cb null, [hostOrIP]
+        return Promise.resolve [hostOrIP]
       else
-        dns.resolve4 hostOrIP, cb
+        @_resolve(hostOrIP)
 
     _pingHost: (address) ->
       return new Promise( (resolve, reject) =>
         @session.pingHost(address, (error, target) =>
+          env.logger.debug "Ping", address, if error? then (if error.message? then error.message else error) else "alive"
           if error? then reject error else resolve target
         )
       )
+
+    _resolveHybrid: (hostOrIP) ->
+      # do both resolve4 and resolve6 queries, at least one must be fulfilled
+      result = []
+      return new Promise( (resolve, reject) =>
+        resolve4(hostOrIP).then( (addresses) =>
+          result = addresses
+        ).catch(
+          # intentionally left empty
+        ).finally( =>
+          resolve6(hostOrIP).then( (addresses) =>
+            resolve result.concat addresses
+          ).catch( (error) =>
+            if result.length > 0
+              resolve result
+            else
+              reject error
+          )
+        )
+      )
+
+    _resolveAny: (hostOrIP) ->
+      return Promise.any([resolve4(hostOrIP), resolve6(hostOrIP)])
 
     getPresence: ->
       if @_presence? then return Promise.resolve @_presence
