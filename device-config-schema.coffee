@@ -1,7 +1,7 @@
 module.exports = {
   title: "pimatic-ping device config schemas"
-  PingPresents: {
-    title: "PingPresents config options"
+  PingPresence: {
+    title: "PingPresence config options"
     type: "object"
     extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
     properties:
