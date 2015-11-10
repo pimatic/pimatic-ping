@@ -2,6 +2,7 @@ module.exports = (env) ->
   # ##Dependencies
   util = require 'util'
   os = require 'os'
+  net = require 'net'
 
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
@@ -21,7 +22,7 @@ module.exports = (env) ->
       deviceConfigDef = require("./device-config-schema")
 
       @framework.deviceManager.registerDeviceClass("PingPresence", {
-        configDef: deviceConfigDef.PingPresents, 
+        configDef: deviceConfigDef.PingPresence,
         createCallback: (config, lastState) => 
           device = new PingPresence(config, lastState, @deviceCount)
           @deviceCount++
@@ -51,7 +52,7 @@ module.exports = (env) ->
       pendingPingsCount = 0
       lastError = null
       doPing = ( =>
-        dns.resolve4(@config.host, (dnsError, addresses) =>
+        @_resolveHost(@config.host, (dnsError, addresses) =>
           if dnsError?
             if lastError?.message isnt dnsError.message
               env.logger.warn("Error on ip lookup of #{@config.host}: #{dnsError}")
@@ -60,7 +61,7 @@ module.exports = (env) ->
             setTimeout(doPing, @config.interval) if pendingPingsCount is 0
           else
             pendingPingsCount++
-            Promise.some(@_pingHost address for address in addresses, 1).then( =>
+            Promise.some(@_pingHost address for address in addresses, 1).then((target) =>
               @_setPresence yes
             ).catch( =>
               @_setPresence no
@@ -72,6 +73,13 @@ module.exports = (env) ->
       )
 
       doPing()
+
+    _resolveHost: (hostOrIP, cb) ->
+      result = net.isIP hostOrIP
+      if result is 4 or result is 6
+        cb null, [hostOrIP]
+      else
+        dns.resolve4 hostOrIP, cb
 
     _pingHost: (address) ->
       return new Promise( (resolve, reject) =>
