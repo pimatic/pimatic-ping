@@ -81,7 +81,6 @@ module.exports = (env) ->
           setTimeout(doPing, @config.interval) if pendingPingsCount is 0
         )
       )
-
       doPing()
 
     _resolveHost: (hostOrIP) ->
@@ -94,13 +93,16 @@ module.exports = (env) ->
     _pingHost: (address) ->
       return new Promise( (resolve, reject) =>
         @session.pingHost(address, (error, target) =>
-          env.logger.debug "Ping", address, if error? then (if error.message? then error.message else error) else "alive"
+          if pingPlugin.config.debug
+            if error?
+              errorMessage = if error.message? then error.message else error
+            env.logger.debug "Ping", address, if errorMessage? then errorMessage else "alive"
           if error? then reject error else resolve target
         )
       )
 
     _resolveHybrid: (hostOrIP) ->
-      # do both resolve4 and resolve6 queries, at least one must be fulfilled
+      # do both resolve4 and resolve6 queries, fails if both queries fail
       result = []
       return new Promise( (resolve, reject) =>
         resolve4(hostOrIP).then( (addresses) =>
@@ -123,10 +125,12 @@ module.exports = (env) ->
       return Promise.any([resolve4(hostOrIP), resolve6(hostOrIP)])
 
     getPresence: ->
-      if @_presence? then return Promise.resolve @_presence
-      return new Promise( (resolve) =>
-        @once('presence', ( (state) -> resolve state ) )
-      ).timeout(@config.timeout + 5*60*1000)
+      if @_presence?
+        return Promise.resolve @_presence
+      else
+        return new Promise( (resolve) =>
+          @once('presence', ( (state) -> resolve state ) )
+        ).timeout(@config.timeout + 5*60*1000)
 
   # For testing...
   pingPlugin.PingPresence = PingPresence
