@@ -21,5 +21,8 @@ module.exports = {
         description: "number of tries to fail after that the device is considered absent"
         type: "number"
         default: 4
+      dnsRecordFamily:
+        description: "the family of DNS address records returned, 4: IPv4, 6: IPv6, 10: both, 0: any"
+        default: 4
   }
 }
