@@ -131,22 +131,25 @@ module.exports = (env) ->
       pendingPingsCount = 0
       lastError = null
       doPing = ( =>
+        if @_destroyed then return
         pendingPingsCount++
         @_resolveHost(@config.host).then( (addresses) =>
           Promise.any(@_pingHost address for address in addresses).then( =>
-            @_setPresence yes
+            unless @_destroyed then @_setPresence yes
           ).catch( =>
-            @_setPresence no
+            unless @_destroyed then @_setPresence no
           ).finally( =>
             pendingPingsCount-- if pendingPingsCount > 0
+            if @_destroyed then return
             setTimeout(doPing, @config.interval) if pendingPingsCount is 0
           )
         ).catch( (dnsError) =>
           if lastError?.message isnt dnsError.message
             env.logger.warn("Error on ip lookup of #{@config.host}: #{dnsError}")
             lastError = dnsError
-          @_setPresence(no)
+          unless @_destroyed then @_setPresence(no)
           pendingPingsCount-- if pendingPingsCount > 0
+          if @_destroyed then return
           setTimeout(doPing, @config.interval) if pendingPingsCount is 0
         )
       )
@@ -200,6 +203,10 @@ module.exports = (env) ->
         return new Promise( (resolve) =>
           @once('presence', ( (state) -> resolve state ) )
         ).timeout(@config.timeout + 5*60*1000)
+
+    destroy: ->
+      super()
+      @session.close()
 
   # For testing...
   pingPlugin.PingPresence = PingPresence
